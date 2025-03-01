@@ -2,33 +2,36 @@
 #include <queue>
 #include <unordered_map>
 
-enum class PlannerType { A_STAR, D_STAR_LITE };
+#include <pcl/kdtree/kdtree_flann.h>
 
-PlannerType parsePlannerId(const std::string &planner_id)
-{
-  if (planner_id == "dstar") {
-    return PlannerType::D_STAR_LITE;
-  }
-  // Default to A*
-  return PlannerType::A_STAR;
-}
+//─────────────────────────────
+// Wrapper function: compute_path chooses between plain A* and dynamic A*.
 std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id,
-                              pcl::PointCloud<pcl::PointXYZ>::Ptr dynamic_obstacle_cloud)
+                              const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers)
 {
-  PlannerType type = parsePlannerId(planner_id);
-  if (type == PlannerType::D_STAR_LITE) {
-    return compute_path_D_star_lite(graph, start, goal);
-  } else {
-    return compute_path_A_star(graph, start, goal);
-  }
+    if (planner_id == "dynamic_a_star") {
+        float inflation_radius = 2.0f;
+        float inflation_weight = 200.0f;
+        float cost_scaling_factor = 1.0f;
+        float inscribed_radius = 0.4f;
+        // Compute dynamic cost map and pass it to a_star.
+        std::vector<float> dynamic_cost_map = compute_dynamic_cost_map(graph, dynamic_obstacles_markers,
+                                                 inflation_radius, cost_scaling_factor, inscribed_radius, inflation_weight);
+        return a_star(graph, start, goal, &dynamic_cost_map);
+    } else {
+        return a_star(graph, start, goal);
+    }
 }
+
+/////////////////////
 
 float heuristic_cost_estimate(const TraversablePoint &a, const TraversablePoint &b)
 {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2) + std::pow(a.z - b.z, 2));
 }
 
-std::vector<int> compute_path_A_star(const Graph &graph, int start, int goal)
+std::vector<int> a_star(const Graph &graph, int start, int goal,
+                        const std::vector<float>* extra_costs)
 {
     const auto &nodes = graph.get_nodes_cloud();
     const auto &adjacency_list = graph.get_adjacency_list();
@@ -80,7 +83,8 @@ std::vector<int> compute_path_A_star(const Graph &graph, int start, int goal)
         for (const auto &neighbor : it->second)
         {
             int neighbor_idx = neighbor.first;
-            float tentative_g_score = g_score[current] + neighbor.second;
+            float extra = (extra_costs) ? (*extra_costs)[neighbor_idx] : 0.0f;
+            float tentative_g_score = g_score[current] + neighbor.second + extra;
 
             if (g_score.find(neighbor_idx) == g_score.end() || tentative_g_score < g_score[neighbor_idx])
             {
@@ -97,9 +101,53 @@ std::vector<int> compute_path_A_star(const Graph &graph, int start, int goal)
     return {};
 }
 
-std::vector<int> compute_path_D_star_lite(const Graph &graph, int start, int goal)
+//─────────────────────────────
+// Compute a dynamic cost map from dynamic obstacle markers.
+std::vector<float> compute_dynamic_cost_map(const Graph &graph,
+                                              const visualization_msgs::msg::MarkerArray &markers,
+                                              float inflation_radius,
+                                              float cost_scaling_factor,
+                                              float inscribed_radius,
+                                              float inflation_weight)
 {
-    return compute_path_A_star(graph, start, goal); //TODO
+    const auto &nodes = graph.get_nodes_cloud();
+    std::vector<float> cost_map(nodes->points.size(), 0.0f);
+    if (markers.markers.empty())
+        return cost_map;
+
+    // Build a kd-tree for the graph nodes.
+    pcl::KdTreeFLANN<TraversablePoint> nodes_tree;
+    nodes_tree.setInputCloud(nodes);
+
+    // For each marker, update the cost map.
+    for (const auto &marker : markers.markers)
+    {
+        // Use the marker's pose as the center.
+        TraversablePoint query;
+        query.x = marker.pose.position.x;
+        query.y = marker.pose.position.y;
+        query.z = marker.pose.position.z;
+
+        // use inflation_radius as the effective search radius.
+        std::vector<int> indices;
+        std::vector<float> sqr_dists;
+        if (nodes_tree.radiusSearch(query, inflation_radius, indices, sqr_dists) > 0)
+        {
+            for (size_t i = 0; i < indices.size(); ++i)
+            {
+                float d = std::sqrt(sqr_dists[i]);
+                float cost = 0.0f;
+                if (d < inscribed_radius)
+                    cost = inflation_weight;
+                else if (d < inflation_radius)
+                    cost = inflation_weight * std::exp(-cost_scaling_factor * (d - inscribed_radius));
+                else
+                    cost = 0.0f;
+                cost_map[indices[i]] += cost;
+            }
+        }
+    }
+    return cost_map;
 }
 
 tf2::Quaternion compute_orientation(const Eigen::Vector3f &current_point,

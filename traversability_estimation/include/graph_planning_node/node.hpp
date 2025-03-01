@@ -14,6 +14,7 @@
 #include <std_msgs/msg/color_rgba.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <nav_msgs/msg/path.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_ros/buffer.h>
@@ -33,9 +34,9 @@ public:
 private:
     GraphPlanningNodeConfig config_;
 
-    // Subscription for input point cloud and dynamic obstacle cloud
+    // Subscription for input point cloud and dynamic obstacle marker array
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
-    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_dynamic_obstacles_;
+    rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr sub_dynamic_obstacles_;
 
     // Services
     rclcpp::Service<traversability_estimation_interfaces::srv::GetGraph>::SharedPtr get_graph_service_;
@@ -48,11 +49,11 @@ private:
     tf2_ros::TransformListener tf_listener_;
 
     Graph graph_;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr dynamic_obstacle_cloud_;
+    visualization_msgs::msg::MarkerArray dynamic_obstacles_markers_;
 
     // Callbacks
     void callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
-    void callback_dynamic_obstacles(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+    void callback_dynamic_obstacles(const visualization_msgs::msg::MarkerArray::SharedPtr msg);
     
     void handle_get_graph_request(
         const std::shared_ptr<traversability_estimation_interfaces::srv::GetGraph::Request> request,

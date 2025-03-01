@@ -12,14 +12,12 @@ GraphPlanningNode::GraphPlanningNode()
     load_parameters(config_, this);
     omp_set_num_threads(config_.common.n_threads);
 
-    dynamic_obstacle_cloud_ = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-
     // Initialize subscriber
     sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
         "traversable", 1, std::bind(&GraphPlanningNode::callback, this, std::placeholders::_1));
 
-    sub_dynamic_obstacles_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-        "obstacles/cloud", 1, std::bind(&GraphPlanningNode::callback_dynamic_obstacles, this, std::placeholders::_1));
+    sub_dynamic_obstacles_ = this->create_subscription<visualization_msgs::msg::MarkerArray>(
+        "obstacles/markers", 1, std::bind(&GraphPlanningNode::callback_dynamic_obstacles, this, std::placeholders::_1));
 
     // Initialize service
     get_graph_service_ = this->create_service<traversability_estimation_interfaces::srv::GetGraph>(
@@ -54,10 +52,12 @@ void GraphPlanningNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr 
                 graph_.get_nodes_cloud()->points.size(), graph_.get_adjacency_list().size());
 }
 
-void GraphPlanningNode::callback_dynamic_obstacles(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+void GraphPlanningNode::callback_dynamic_obstacles(const visualization_msgs::msg::MarkerArray::SharedPtr msg)
 {
-    pcl::fromROSMsg(*msg, *dynamic_obstacle_cloud_);
+    dynamic_obstacles_markers_ = *msg;
 }
+
+
 
 void GraphPlanningNode::handle_get_graph_request(
     const std::shared_ptr<traversability_estimation_interfaces::srv::GetGraph::Request> /*request*/,
@@ -166,7 +166,7 @@ void GraphPlanningNode::execute(
     }
 
     // Compute path using graph data
-    auto path = compute_path(graph_, start_idx, goal_idx, goal->planner_id, dynamic_obstacle_cloud_);
+    auto path = compute_path(graph_, start_idx, goal_idx, goal->planner_id, dynamic_obstacles_markers_);
     if (path.empty())
     {
         // result->error_code = nav2_msgs::action::ComputePathToPose::Result::NO_VALID_PATH;
