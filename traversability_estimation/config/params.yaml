@@ -2,7 +2,7 @@ traversability_estimation:
   ros__parameters:
     use_sim_time: true
     common:
-      input_cloud: "/world/world.pcd"
+      input_cloud: "/world/world.pcd" # Can be .pcd file or a ros topic (PointCloud2)
       map_frame: "map"
       n_threads: 8 #number of threads
       publish_rate: 0.5 #publish rate in [Hz]
@@ -32,15 +32,16 @@ traversability_estimation:
         angle_threshold: 2.0 #angle gap threshold in radians
 
     costs: #http://wiki.ros.org/costmap_2d/hydro/inflation
-      lethal_cost: 254.0 #when a point hits this cost it is considered non-traversable (max cost)
+      max_cost: 254.0 #when a point hits this cost it is considered non-traversable (c_{max} in paper)
       slope_weight: 100.0 #slope is a value between 0 (horizontal) and 1 (vertical), slope cost = slope * slope_weight
       curvature_weight: 100.0 #curvature is a value between 0 (flat/smooth) and 1 (curved/noisy/rough), curvature cost = curvature * curvature_weight
-      inflation: #(lethal_cost - 1) * exp(-1*cost_scaling_factor * (distance_from_obstacle/boundary - robot.inscribed_radius))
+      inflation_weight: 254.0
+      inflation: #inflation_weight * exp(-1*cost_scaling_factor * (distance_from_obstacle/boundary - robot.inscribed_radius))
         radius: 1.5 #distance where cost will be applied, don't use to high values because of performance
-        cost_scaling_factor: 2.5
+        cost_scaling_factor: 2.5 # \alpha in paper
         obstacle_normal_offset: 0.1 #offset normal plane (cost will be applied by finding the closest obstacle point above the normal plane)
         boundary_normal_offset: -0.1 #offset normal plane (cost will be applied by finding the closest boundary point above the normal plane)
-      # final cost = slope_cost + curvature_cost + inflation_cost, but final cost is capped at lethal_cost -> non-traversable
+      # final cost = slope_cost + curvature_cost + inflation_cost, but final cost is capped at max_cost -> non-traversable
 
 graph_planning:
   ros__parameters:
