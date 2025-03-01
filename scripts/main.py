@@ -31,7 +31,7 @@ class DemoNode(Node):
         self.publish_world()
 
         # Timer callback to repeatedly call the action client
-        self.action_timer = self.create_timer(1.0, self.timer_callback)
+        self.action_timer = self.create_timer(0.25, self.timer_callback)
 
 
     def publish_world(self):
@@ -75,10 +75,7 @@ class DemoNode(Node):
             # Publish end marker, TF for goal, and send goals to clients
             self.publish_end_marker(self.goal_pose)
             
-            # Immediately send the start and goal poses to the client
-            result = self.graph_client.send_goal(self.start_pose, self.goal_pose)
-            if result is not None:
-                self.path_pub.publish(result.path)
+           
 
     def timer_callback(self):
         """Timer callback that calls the action repeatedly if start and goal are available."""
