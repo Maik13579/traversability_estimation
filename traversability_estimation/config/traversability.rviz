@@ -10,6 +10,7 @@ Panels:
         - /TraversabilityEstimation1
         - /TraversabilityEstimation1/Costs1
         - /TraversabilityEstimation1/Graph1/Namespaces1
+        - /Paths1
       Splitter Ratio: 0.6348314881324768
     Tree Height: 619
   - Class: rviz_common/Selection
@@ -408,34 +409,6 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /start_marker
       Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz_default_plugins/Path
-      Color: 0; 0; 255
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.10000000149011612
-      Line Style: Billboards
-      Line Width: 0.25
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0.25
-      Pose Color: 255; 85; 255
-      Pose Style: Axes
-      Radius: 0.009999999776482582
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /path
-      Value: true
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: Obstacles
@@ -448,6 +421,66 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /obstacles/markers
       Value: true
+    - Class: rviz_common/Group
+      Displays:
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz_default_plugins/Path
+          Color: 0; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.10000000149011612
+          Line Style: Billboards
+          Line Width: 0.25
+          Name: A*
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0.25
+          Pose Color: 255; 85; 255
+          Pose Style: Axes
+          Radius: 0.009999999776482582
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /path/a_star
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz_default_plugins/Path
+          Color: 170; 0; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.10000000149011612
+          Line Style: Billboards
+          Line Width: 0.25
+          Name: Dynamic_A*
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0.25
+          Pose Color: 255; 85; 255
+          Pose Style: Axes
+          Radius: 0.009999999776482582
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /path/dynamic_a_star
+          Value: true
+      Enabled: true
+      Name: Paths
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
