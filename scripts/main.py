@@ -22,7 +22,11 @@ class DemoNode(Node):
         self.world_pub = self.create_publisher(Marker, 'world', 10)
         self.start_marker_pub = self.create_publisher(Marker, 'start_marker', 10)
         self.end_marker_pub = self.create_publisher(Marker, 'end_marker', 10)
-        self.path_pub = self.create_publisher(Path, 'path', 10)
+
+        self.planners = {
+            'a_star': self.create_publisher(Path, 'path/a_star', 10),
+            'dynamic_a_star': self.create_publisher(Path, 'path/dynamic_a_star', 10)
+        }
 
         self.graph_client = GraphPlanningClient()
 
@@ -81,11 +85,13 @@ class DemoNode(Node):
         """Timer callback that calls the action repeatedly if start and goal are available."""
         self.publish_world()
         if hasattr(self, 'start_pose') and hasattr(self, 'goal_pose'):
-            result = self.graph_client.send_goal(self.start_pose, self.goal_pose)
-            if result is not None:
-                secconds = result.planning_time.sec + result.planning_time.nanosec * 1e-9
-                self.get_logger().info("Planning time: "+str(secconds))
-                self.path_pub.publish(result.path)
+
+            for planner, pub in self.planners.items():
+                result = self.graph_client.send_goal(self.start_pose, self.goal_pose, planner)
+                if result is not None:
+                    secconds = result.planning_time.sec + result.planning_time.nanosec * 1e-9
+                    self.get_logger().info(planner+" planning time: "+str(secconds))
+                    pub.publish(result.path)
 
     def publish_marker(self, pose, publisher, ns, marker_id, r, g, b):
         """Publish a marker with specified color to represent the start or end position."""
