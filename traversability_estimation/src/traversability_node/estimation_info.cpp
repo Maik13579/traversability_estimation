@@ -59,7 +59,7 @@ void perform_traversability_estimation(
                 point.normal_x = normal_vector.x();
                 point.normal_y = normal_vector.y();
                 point.normal_z = normal_vector.z();
-                point.slope = slope_angle;
+                point.slope_angle = slope_angle;
                 point.curvature = normal.curvature;
                 local_traversable->points.push_back(point);
             }

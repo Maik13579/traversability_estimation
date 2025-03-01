@@ -35,6 +35,7 @@ struct TraversablePoint
     float intensity; // Typically part of LiDAR output, not used atm
     float curvature; // Value between 0 and 1 (c_i^{(c)} in the paper)
     float slope; // Value between 0 and 1 (c_i^{(s)} in the paper)
+    float slope_angle; // Angle in degrees
     uint32_t cluster_id; // Cluster ID
     float inflation; // Value between 0 and 1 (c_i^{(i)} in the paper)
     float curvature_cost; // curvature * w^{(c)}
@@ -57,7 +58,8 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(TraversablePoint, //
                                   (float, data_n[4], data_n)    //
                                   (float, intensity, intensity) //
                                   (float, slope, slope)         //
-                                  (float, curvature, curvature) //
+                                  (float, slope_angle, slope_angle)       //
+                                  (float, curvature, curvature)           //
                                   (uint32_t, cluster_id, cluster_id)      //
                                   (float, inflation, inflation)           //
                                   (float, curvature_cost, curvature_cost) //
