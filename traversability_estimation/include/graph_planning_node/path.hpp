@@ -28,7 +28,7 @@ float heuristic_cost_estimate(const TraversablePoint &a, const TraversablePoint 
 /**
  * @brief Compute a path from a start node to a goal node using A* algorithm.
  */
-std::vector<int> a_star(const Graph &graph, int start, int goal,
+std::vector<int> a_star(const Graph &graph, int start, int goal, float max_cost = 254.0f,
                         const std::vector<float>* extra_costs = nullptr);
 
 
@@ -39,13 +39,12 @@ std::vector<int> a_star(const Graph &graph, int start, int goal,
  * @param markers The MarkerArray representing dynamic obstacles.
  * @param inflation_radius The influence radius.
  * @param cost_scaling_factor Decay factor for cost.
- * @param inscribed_radius Below this, maximum cost applies.
  * @param inflation_weight Maximum cost weight.
  * @return A vector of extra costs (one per node).
  */
 std::vector<float> compute_dynamic_cost_map(const Graph &graph,
     const visualization_msgs::msg::MarkerArray &markers,
-    float inflation_radius, float cost_scaling_factor, float inscribed_radius, float inflation_weight);
+    float inflation_radius, float cost_scaling_factor, float inflation_weight);
 
 
 /**

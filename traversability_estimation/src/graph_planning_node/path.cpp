@@ -9,17 +9,17 @@
 std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id,
                               const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers)
 {
+    float max_cost = 254.0f;
     if (planner_id == "dynamic_a_star") {
-        float inflation_radius = 2.0f;
-        float inflation_weight = 200.0f;
+        float inflation_radius = 1.5f;
+        float inflation_weight = 1000.0f;
         float cost_scaling_factor = 1.0f;
-        float inscribed_radius = 0.4f;
         // Compute dynamic cost map and pass it to a_star.
         std::vector<float> dynamic_cost_map = compute_dynamic_cost_map(graph, dynamic_obstacles_markers,
-                                                 inflation_radius, cost_scaling_factor, inscribed_radius, inflation_weight);
-        return a_star(graph, start, goal, &dynamic_cost_map);
+                                                 inflation_radius, cost_scaling_factor, inflation_weight);
+        return a_star(graph, start, goal, max_cost, &dynamic_cost_map);
     } else {
-        return a_star(graph, start, goal);
+        return a_star(graph, start, goal, max_cost);
     }
 }
 
@@ -30,7 +30,7 @@ float heuristic_cost_estimate(const TraversablePoint &a, const TraversablePoint 
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2) + std::pow(a.z - b.z, 2));
 }
 
-std::vector<int> a_star(const Graph &graph, int start, int goal,
+std::vector<int> a_star(const Graph &graph, int start, int goal, float max_cost,
                         const std::vector<float>* extra_costs)
 {
     const auto &nodes = graph.get_nodes_cloud();
@@ -84,8 +84,12 @@ std::vector<int> a_star(const Graph &graph, int start, int goal,
         {
             int neighbor_idx = neighbor.first;
             float extra = (extra_costs) ? (*extra_costs)[neighbor_idx] : 0.0f;
-            float tentative_g_score = g_score[current] + neighbor.second + extra;
+            float edge_cost = neighbor.second + extra;
+            // Skip this edge if the combined cost is too high.
+            if (edge_cost > max_cost)
+                continue;
 
+            float tentative_g_score = g_score[current] + edge_cost;
             if (g_score.find(neighbor_idx) == g_score.end() || tentative_g_score < g_score[neighbor_idx])
             {
                 // This path to neighbor is better
@@ -107,7 +111,6 @@ std::vector<float> compute_dynamic_cost_map(const Graph &graph,
                                               const visualization_msgs::msg::MarkerArray &markers,
                                               float inflation_radius,
                                               float cost_scaling_factor,
-                                              float inscribed_radius,
                                               float inflation_weight)
 {
     const auto &nodes = graph.get_nodes_cloud();
@@ -128,10 +131,12 @@ std::vector<float> compute_dynamic_cost_map(const Graph &graph,
         query.y = marker.pose.position.y;
         query.z = marker.pose.position.z;
 
-        // use inflation_radius as the effective search radius.
+        // use inflation_radius + 1.5* max extend as the effective search radius.
         std::vector<int> indices;
         std::vector<float> sqr_dists;
-        if (nodes_tree.radiusSearch(query, inflation_radius, indices, sqr_dists) > 0)
+        float inscribed_radius = std::max(marker.scale.x, std::max(marker.scale.y, marker.scale.z));
+        float radius = inflation_radius + 1.5f * inscribed_radius;
+        if (nodes_tree.radiusSearch(query, radius, indices, sqr_dists) > 0)
         {
             for (size_t i = 0; i < indices.size(); ++i)
             {
@@ -139,11 +144,12 @@ std::vector<float> compute_dynamic_cost_map(const Graph &graph,
                 float cost = 0.0f;
                 if (d < inscribed_radius)
                     cost = inflation_weight;
-                else if (d < inflation_radius)
+                else if (d < radius)
                     cost = inflation_weight * std::exp(-cost_scaling_factor * (d - inscribed_radius));
                 else
                     cost = 0.0f;
-                cost_map[indices[i]] += cost;
+                if (cost_map[indices[i]] < cost)
+                    cost_map[indices[i]] = cost;
             }
         }
     }
