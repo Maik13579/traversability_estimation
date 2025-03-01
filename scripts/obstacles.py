@@ -2,12 +2,9 @@
 import rclpy
 from rclpy.node import Node
 import yaml
-import open3d as o3d
 import numpy as np
 
 from visualization_msgs.msg import Marker, MarkerArray
-from sensor_msgs.msg import PointCloud2, PointField
-from sensor_msgs_py import point_cloud2
 from std_msgs.msg import Header
 from rclpy.qos import QoSProfile, QoSHistoryPolicy
 
@@ -20,25 +17,16 @@ class Obstacle:
         # Parse the size string ("1.0, 1.0, 1.0") into a list of floats.
         size_str = config.get('size', "1.0,1.0,1.0")
         self.size = [float(x.strip()) for x in size_str.split(',')]
-        # Compute an offset (half the size) so that the point cloud is centered.
+        # Compute an offset (half the size) so that the marker is centered.
         self.offset = np.array(self.size) / 2.0
 
-        # Create the Open3D mesh for a cube.
+        # Create a placeholder for the obstacle mesh.
+        # (In this simplified version we don't generate a cloud.)
         if self.type == 'cube':
-            self.mesh = o3d.geometry.TriangleMesh.create_box(width=self.size[0],
-                                                             height=self.size[1],
-                                                             depth=self.size[2])
+            # The marker will represent a cube.
+            pass
         else:
-            self.mesh = o3d.geometry.TriangleMesh.create_box(width=self.size[0],
-                                                             height=self.size[1],
-                                                             depth=self.size[2])
-        self.mesh.compute_vertex_normals()
-
-        # Sample a point cloud from the mesh and downsample it.
-        number_of_points = 100_000
-        voxel_size = 0.05
-        self.cloud = self.mesh.sample_points_uniformly(number_of_points=number_of_points)
-        self.cloud = self.cloud.voxel_down_sample(voxel_size=voxel_size)
+            pass
 
         if is_dynamic:
             # For dynamic obstacles, store the path (list of waypoints) and speed.
@@ -110,10 +98,9 @@ class ObstaclesNode(Node):
                 except Exception as e:
                     self.get_logger().error(f"Error loading static obstacle '{name}': {e}")
 
-        # Create publishers with custom QoS to only keep the latest message.
+        # Create a publisher for MarkerArray with a custom QoS.
         qos = QoSProfile(depth=1, history=QoSHistoryPolicy.KEEP_LAST)
         self.marker_array_pub = self.create_publisher(MarkerArray, 'obstacles/markers', qos)
-        self.cloud_pub = self.create_publisher(PointCloud2, 'obstacles/cloud', qos)
 
         self.last_time = self.get_clock().now()
         self.timer = self.create_timer(0.1, self.timer_callback)
@@ -161,47 +148,6 @@ class ObstaclesNode(Node):
             marker_id += 1
 
         self.marker_array_pub.publish(marker_array)
-
-        # Compute the current combined point cloud.
-        all_points = []
-        for obs in self.dynamic_obstacles + self.static_obstacles:
-            pts = np.asarray(obs.cloud.points)
-            pts_translated = pts - obs.offset + obs.get_current_position()
-            all_points.append(pts_translated)
-        if all_points:
-            all_points = np.concatenate(all_points, axis=0)
-            combined_cloud = o3d.geometry.PointCloud()
-            combined_cloud.points = o3d.utility.Vector3dVector(all_points)
-
-            header = Header()
-            header.stamp = current_time.to_msg()
-            header.frame_id = "map"
-
-            fields = []
-            pf = PointField()
-            pf.name = 'x'
-            pf.offset = 0
-            pf.datatype = PointField.FLOAT32
-            pf.count = 1
-            fields.append(pf)
-
-            pf = PointField()
-            pf.name = 'y'
-            pf.offset = 4
-            pf.datatype = PointField.FLOAT32
-            pf.count = 1
-            fields.append(pf)
-
-            pf = PointField()
-            pf.name = 'z'
-            pf.offset = 8
-            pf.datatype = PointField.FLOAT32
-            pf.count = 1
-            fields.append(pf)
-
-            pc2_msg = point_cloud2.create_cloud(header, fields,
-                         np.asarray(combined_cloud.points, dtype=np.float32))
-            self.cloud_pub.publish(pc2_msg)
 
 def main(args=None):
     rclpy.init(args=args)
