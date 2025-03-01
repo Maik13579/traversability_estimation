@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 
@@ -29,6 +30,8 @@ class DemoNode(Node):
         self.click_count = 1
         self.publish_world()
 
+        # Timer callback to repeatedly call the action client
+        self.action_timer = self.create_timer(1.0, self.timer_callback)
 
 
     def publish_world(self):
@@ -43,7 +46,7 @@ class DemoNode(Node):
         marker.scale.x = marker.scale.y = marker.scale.z = 1.0
         marker.color.a = 1.0
         marker.color.r = marker.color.g = marker.color.b = 1.0
-        marker.mesh_resource = "file://"+self.path
+        marker.mesh_resource = "file://" + self.path
         marker.mesh_use_embedded_materials = False
         self.world_pub.publish(marker)
 
@@ -55,12 +58,9 @@ class DemoNode(Node):
         pose.pose.orientation.w = 1.0
         return pose
 
-
     def clicked_point_callback(self, msg):
         """Callback to handle clicked points and alternate between start and goal markers."""
         clicked_pose = self.create_pose_stamped(msg)
-        self.publish_world()
-
         self.click_count += 1
 
         if self.click_count % 2 == 0:
@@ -75,13 +75,19 @@ class DemoNode(Node):
             # Publish end marker, TF for goal, and send goals to clients
             self.publish_end_marker(self.goal_pose)
             
-            # Send the start and goal poses to the client
+            # Immediately send the start and goal poses to the client
             result = self.graph_client.send_goal(self.start_pose, self.goal_pose)
-
             if result is not None:
                 self.path_pub.publish(result.path)
 
-         
+    def timer_callback(self):
+        """Timer callback that calls the action repeatedly if start and goal are available."""
+        self.publish_world()
+        if hasattr(self, 'start_pose') and hasattr(self, 'goal_pose'):
+            result = self.graph_client.send_goal(self.start_pose, self.goal_pose)
+            if result is not None:
+                self.path_pub.publish(result.path)
+            self.get_logger().info("Action called again via timer.")
 
     def publish_marker(self, pose, publisher, ns, marker_id, r, g, b):
         """Publish a marker with specified color to represent the start or end position."""
@@ -99,7 +105,7 @@ class DemoNode(Node):
         publisher.publish(marker)
 
     def publish_start_marker(self, start_pose):
-        """Publish the start marker"""
+        """Publish the start marker."""
         self.publish_marker(start_pose, self.start_marker_pub, "start_marker", 0, 1.0, 0.0, 0.0)
         self.get_logger().info(f"Published start position and base_link frame at ({start_pose.pose.position.x}, {start_pose.pose.position.y}, {start_pose.pose.position.z})")
 
@@ -114,7 +120,6 @@ def main(args=None):
     rclpy.init(args=args)
     import sys
     node = DemoNode(path=sys.argv[1])
-
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
