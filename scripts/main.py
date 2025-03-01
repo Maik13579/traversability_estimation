@@ -88,10 +88,14 @@ class DemoNode(Node):
 
             for planner, pub in self.planners.items():
                 result = self.graph_client.send_goal(self.start_pose, self.goal_pose, planner)
-                if result is not None:
+                if result is not None and len(result.path.poses) > 0:
                     secconds = result.planning_time.sec + result.planning_time.nanosec * 1e-9
                     self.get_logger().info(planner+" planning time: "+str(secconds))
                     pub.publish(result.path)
+                else:
+                    empty_path = Path()
+                    empty_path.header.frame_id = "map"
+                    pub.publish(empty_path)
 
     def publish_marker(self, pose, publisher, ns, marker_id, r, g, b):
         """Publish a marker with specified color to represent the start or end position."""
