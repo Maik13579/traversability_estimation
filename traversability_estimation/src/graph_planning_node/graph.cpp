@@ -19,6 +19,7 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
     const float lethal_cost = config.costs.lethal_cost;
     const float distance_weight = config.costs.distance_weight;
     const float alignment_cost_weight = config.costs.alignment_cost_weight;
+    const float traversability_weight = config.costs.traversability_weight;
     const int n_threads = config.common.n_threads;
 
     // Store the original traversable cloud
@@ -106,7 +107,9 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
 
                 float distance = std::sqrt(neighbor.second);
                 float alignment_cost = compute_alignment_cost(nodes_cloud_->points[i], nodes_cloud_->points[neighbor_idx], config);
-                float edge_cost = distance * distance_weight + alignment_cost * alignment_cost_weight + nodes_cloud_->points[neighbor_idx].final_cost;
+                float edge_cost = distance * distance_weight \
+                                + alignment_cost * alignment_cost_weight \
+                                + nodes_cloud_->points[neighbor_idx].final_cost * traversability_weight;
 
                 if (edge_cost >= lethal_cost)
                     continue;

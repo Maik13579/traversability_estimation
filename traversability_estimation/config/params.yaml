@@ -50,11 +50,13 @@ graph_planning:
       n_threads: 8 #number of threads
       map_frame: "map"
       robot_frame: "base_link"
-    costs: #edge cost = distance_cost + alignment_cost + goal_node_final_cost, but is capped at lethal_cost where the edge gets deleted
-      lethal_cost: 254.0 #max cost
+    costs: 
+      lethal_cost: 254.0 #c_{lethal} in paper
       distance_weight: 50.0 #distance cost = distance * distance_weight
       alignment_cost_weight: 500.0 #alignment cost = (1 - abs(dot(movement_direction, gradient_direction))) * alignment_cost_weight
+      traversability_weight: 1.0 #traversability_cost = goal_nodes final cost * traversability_weight
       alignment_slope_threshold: 10.0 #in degree
+      #final edge cost = distance_cost + alignment_cost + traversability_cost, but is capped at lethal_cost where the edge gets deleted
 
     graph:
       voxel_size: 0.2 #voxel grid size
