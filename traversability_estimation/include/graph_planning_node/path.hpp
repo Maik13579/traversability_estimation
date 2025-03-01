@@ -20,7 +20,17 @@ float heuristic_cost_estimate(const TraversablePoint &a, const TraversablePoint 
 /**
  * @brief Compute a path from a start node to a goal node using A* algorithm.
  */
-std::vector<int> compute_path(const Graph &graph, int start, int goal);
+std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id);
+
+/**
+ * @brief Compute a path from a start node to a goal node using A* algorithm.
+ */
+std::vector<int> compute_path_A_star(const Graph &graph, int start, int goal);
+
+/**
+ * @brief Compute a path from a start node to a goal node using D* algorithm.
+ */
+std::vector<int> compute_path_D_star_lite(const Graph &graph, int start, int goal);
 
 /**
  * @brief Computes the orientation as a quaternion based on the movement direction

@@ -2,12 +2,32 @@
 #include <queue>
 #include <unordered_map>
 
+enum class PlannerType { A_STAR, D_STAR_LITE };
+
+PlannerType parsePlannerId(const std::string &planner_id)
+{
+  if (planner_id == "dstar") {
+    return PlannerType::D_STAR_LITE;
+  }
+  // Default to A*
+  return PlannerType::A_STAR;
+}
+std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id)
+{
+  PlannerType type = parsePlannerId(planner_id);
+  if (type == PlannerType::D_STAR_LITE) {
+    return compute_path_D_star_lite(graph, start, goal);
+  } else {
+    return compute_path_A_star(graph, start, goal);
+  }
+}
+
 float heuristic_cost_estimate(const TraversablePoint &a, const TraversablePoint &b)
 {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2) + std::pow(a.z - b.z, 2));
 }
 
-std::vector<int> compute_path(const Graph &graph, int start, int goal)
+std::vector<int> compute_path_A_star(const Graph &graph, int start, int goal)
 {
     const auto &nodes = graph.get_nodes_cloud();
     const auto &adjacency_list = graph.get_adjacency_list();
@@ -74,6 +94,11 @@ std::vector<int> compute_path(const Graph &graph, int start, int goal)
 
     // Return empty path if no path is found
     return {};
+}
+
+std::vector<int> compute_path_D_star_lite(const Graph &graph, int start, int goal)
+{
+    return compute_path_A_star(graph, start, goal); //TODO
 }
 
 tf2::Quaternion compute_orientation(const Eigen::Vector3f &current_point,

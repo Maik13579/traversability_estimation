@@ -166,7 +166,7 @@ void GraphPlanningNode::execute(
     }
 
     // Compute path using graph data
-    auto path = compute_path(graph_, start_idx, goal_idx);
+    auto path = compute_path(graph_, start_idx, goal_idx, goal->planner_id);
     if (path.empty())
     {
         // result->error_code = nav2_msgs::action::ComputePathToPose::Result::NO_VALID_PATH;
