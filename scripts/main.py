@@ -35,7 +35,7 @@ class DemoNode(Node):
         self.publish_world()
 
         # Timer callback to repeatedly call the action client
-        self.action_timer = self.create_timer(1.0, self.timer_callback)
+        self.action_timer = self.create_timer(0.25, self.timer_callback)
 
 
     def publish_world(self):
