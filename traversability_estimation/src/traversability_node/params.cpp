@@ -27,8 +27,9 @@ void load_parameters(TraversabilityNodeConfig &config, rclcpp::Node *node)
     config.robot.allowed_slope_angle = declare_and_get_parameter<double>("robot.allowed_slope_angle", 30.0, node, "robot.allowed_slope_angle");
 
     // Costs parameters
-    config.costs.lethal_cost = declare_and_get_parameter<double>("costs.lethal_cost", 254.0, node, "costs.lethal_cost");
+    config.costs.max_cost = declare_and_get_parameter<double>("costs.max_cost", 254.0, node, "costs.max_cost");
     config.costs.slope_weight = declare_and_get_parameter<double>("costs.slope_weight", 100.0, node, "costs.slope_weight");
+    config.costs.inflation_weight = declare_and_get_parameter<double>("costs.inflation_weight", 254.0, node, "costs.inflation_weight");
     config.costs.curvature_weight = declare_and_get_parameter<double>("costs.curvature_weight", 100.0, node, "costs.curvature_weight");
 
     // Inflation parameters

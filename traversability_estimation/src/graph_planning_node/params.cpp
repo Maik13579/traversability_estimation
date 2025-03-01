@@ -12,6 +12,7 @@ void load_parameters(GraphPlanningNodeConfig &config, rclcpp::Node *node)
     config.costs.distance_weight = declare_and_get_parameter<double>("costs.distance_weight", 50.0, node, "distance_weight");
     config.costs.alignment_cost_weight = declare_and_get_parameter<double>("costs.alignment_cost_weight", 1.0, node, "alignment_cost_weight");
     config.costs.alignment_slope_threshold = declare_and_get_parameter<double>("costs.alignment_slope_threshold", 10.0, node, "alignment_slope_threshold");
+    config.costs.traversability_weight = declare_and_get_parameter<double>("costs.traversability_weight", 1.0, node, "traversability_weight");
 
     // Load the graph parameters
     config.graph.voxel_size = declare_and_get_parameter<double>("graph.voxel_size", 0.05, node, "voxel_size");

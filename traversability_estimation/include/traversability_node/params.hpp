@@ -89,9 +89,10 @@ struct InflationParams
 
 struct CostsParams
 {
-    double lethal_cost;
+    double max_cost;
     double slope_weight;
     double curvature_weight;
+    double inflation_weight;
     InflationParams inflation;
 };
 

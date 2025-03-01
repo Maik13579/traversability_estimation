@@ -19,6 +19,7 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
     const float lethal_cost = config.costs.lethal_cost;
     const float distance_weight = config.costs.distance_weight;
     const float alignment_cost_weight = config.costs.alignment_cost_weight;
+    const float traversability_weight = config.costs.traversability_weight;
     const int n_threads = config.common.n_threads;
 
     // Store the original traversable cloud
@@ -51,15 +52,17 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
             nodes_cloud_->points[i].cluster_id = closest_point.cluster_id;
 
             // Initialize accumulators for averaging other attributes
-            float total_slope = 0.0f, total_curvature = 0.0f, total_intensity = 0.0f;
+            float total_slope = 0.0f, total_slope_angle = 0.0f, total_curvature = 0.0f, total_intensity = 0.0f, total_inflation = 0.0f;
             float total_inflation_cost = 0.0f, total_slope_cost = 0.0f, total_curvature_cost = 0.0f, total_final_cost = 0.0f;
 
             for (int idx : nearest_indices)
             {
                 const auto &point = traversable_cloud_->points[idx];
                 total_slope += point.slope;
+                total_slope_angle += point.slope_angle;
                 total_curvature += point.curvature;
                 total_intensity += point.intensity;
+                total_inflation += point.inflation;
                 total_inflation_cost += point.inflation_cost;
                 total_slope_cost += point.slope_cost;
                 total_curvature_cost += point.curvature_cost;
@@ -69,8 +72,10 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
             // Compute averages for the remaining fields
             const size_t num_points = nearest_indices.size();
             nodes_cloud_->points[i].slope = total_slope / num_points;
+            nodes_cloud_->points[i].slope_angle = total_slope_angle / num_points;
             nodes_cloud_->points[i].curvature = total_curvature / num_points;
             nodes_cloud_->points[i].intensity = total_intensity / num_points;
+            nodes_cloud_->points[i].inflation = total_inflation / num_points;
             nodes_cloud_->points[i].inflation_cost = total_inflation_cost / num_points;
             nodes_cloud_->points[i].slope_cost = total_slope_cost / num_points;
             nodes_cloud_->points[i].curvature_cost = total_curvature_cost / num_points;
@@ -106,7 +111,9 @@ void Graph::build_graph(pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud
 
                 float distance = std::sqrt(neighbor.second);
                 float alignment_cost = compute_alignment_cost(nodes_cloud_->points[i], nodes_cloud_->points[neighbor_idx], config);
-                float edge_cost = distance * distance_weight + alignment_cost * alignment_cost_weight + nodes_cloud_->points[neighbor_idx].final_cost;
+                float edge_cost = distance * distance_weight \
+                                + alignment_cost * alignment_cost_weight \
+                                + nodes_cloud_->points[neighbor_idx].final_cost * traversability_weight;
 
                 if (edge_cost >= lethal_cost)
                     continue;
@@ -125,7 +132,7 @@ float Graph::compute_alignment_cost(const TraversablePoint &from_point, const Tr
 {
     const float alignment_slope_threshold = config.costs.alignment_slope_threshold;
 
-    if (from_point.slope < alignment_slope_threshold)
+    if (from_point.slope_angle < alignment_slope_threshold)
         return 0.0f;
 
     Eigen::Vector2f movement_vector(to_point.x - from_point.x, to_point.y - from_point.y);

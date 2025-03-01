@@ -36,6 +36,7 @@ struct CostsParams
     double distance_weight;
     double alignment_cost_weight;
     double alignment_slope_threshold;
+    double traversability_weight;
 };
 
 struct GraphParams
