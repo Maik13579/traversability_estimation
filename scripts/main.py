@@ -31,7 +31,7 @@ class DemoNode(Node):
         self.publish_world()
 
         # Timer callback to repeatedly call the action client
-        self.action_timer = self.create_timer(0.25, self.timer_callback)
+        self.action_timer = self.create_timer(1.0, self.timer_callback)
 
 
     def publish_world(self):
@@ -83,8 +83,9 @@ class DemoNode(Node):
         if hasattr(self, 'start_pose') and hasattr(self, 'goal_pose'):
             result = self.graph_client.send_goal(self.start_pose, self.goal_pose)
             if result is not None:
+                secconds = result.planning_time.sec + result.planning_time.nanosec * 1e-9
+                self.get_logger().info("Planning time: "+str(secconds))
                 self.path_pub.publish(result.path)
-            self.get_logger().info("Action called again via timer.")
 
     def publish_marker(self, pose, publisher, ns, marker_id, r, g, b):
         """Publish a marker with specified color to represent the start or end position."""
