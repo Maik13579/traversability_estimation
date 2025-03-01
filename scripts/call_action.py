@@ -15,7 +15,7 @@ class GraphPlanningClient(Node):
         self.get_logger().info('Waiting for action server...')
         self._action_client.wait_for_server()
 
-    def send_goal(self, start_pose: PoseStamped, goal_pose: PoseStamped):
+    def send_goal(self, start_pose: PoseStamped, goal_pose: PoseStamped, planner_id: str='a_star'):
         """
         Send goal to the action server and return the result synchronously.
 
@@ -30,6 +30,7 @@ class GraphPlanningClient(Node):
         goal_msg.start = start_pose
         goal_msg.goal = goal_pose
         goal_msg.use_start = True
+        goal_msg.planner_id = planner_id
 
         self.get_logger().info('Sending goal...')
         send_goal_future = self._action_client.send_goal_async(goal_msg)
