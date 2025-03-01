@@ -4,6 +4,10 @@ services:
     extends: 
       file: common.yaml
       service: .common_nvidia
+    volumes:
+      - ../world:/world
+      - ../traversability_estimation/config:/root/ros2_ws/src/traversability_estimation/traversability_estimation/config
+      - ../traversability_estimation/launch:/root/ros2_ws/src/traversability_estimation/traversability_estimation/launch
     command: ros2 launch traversability_estimation traversability_estimation.launch.py use_rviz:=true
 
   demo:
@@ -11,6 +15,9 @@ services:
     extends: 
       file: common.yaml
       service: .common_nvidia
+    volumes:
+      - ../world:/world
+      - ../scripts:/scripts
     command: 
       - bash
       - -c

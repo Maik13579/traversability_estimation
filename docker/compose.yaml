@@ -11,4 +11,9 @@ services:
     extends: 
       file: common.yaml
       service: .common
-    command: python3 /scripts/main.py /world/world.stl
+    command: 
+    - bash
+    - -c
+    - |  
+        python3 /scripts/obstacles.py /world/obstacles.yaml&
+        python3 /scripts/main.py /world/world.stl
