@@ -33,8 +33,9 @@ public:
 private:
     GraphPlanningNodeConfig config_;
 
-    // Subscription for input point cloud
+    // Subscription for input point cloud and dynamic obstacle cloud
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_;
+    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_dynamic_obstacles_;
 
     // Services
     rclcpp::Service<traversability_estimation_interfaces::srv::GetGraph>::SharedPtr get_graph_service_;
@@ -47,9 +48,11 @@ private:
     tf2_ros::TransformListener tf_listener_;
 
     Graph graph_;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_obstacles_;
 
     // Callbacks
     void callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+    void callback_dynamic_obstacles(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
     
     void handle_get_graph_request(
         const std::shared_ptr<traversability_estimation_interfaces::srv::GetGraph::Request> request,

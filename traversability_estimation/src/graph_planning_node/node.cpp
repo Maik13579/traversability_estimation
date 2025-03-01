@@ -12,9 +12,14 @@ GraphPlanningNode::GraphPlanningNode()
     load_parameters(config_, this);
     omp_set_num_threads(config_.common.n_threads);
 
+    dynamic_obstacles_ = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>());
+
     // Initialize subscriber
     sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
         "traversable", 1, std::bind(&GraphPlanningNode::callback, this, std::placeholders::_1));
+
+    sub_dynamic_obstacles_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
+        "obstacles/cloud", 1, std::bind(&GraphPlanningNode::callback_dynamic_obstacles, this, std::placeholders::_1));
 
     // Initialize service
     get_graph_service_ = this->create_service<traversability_estimation_interfaces::srv::GetGraph>(
@@ -47,6 +52,11 @@ void GraphPlanningNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr 
     graph_.build_graph(graph_.get_nodes_cloud(), config_);
     RCLCPP_INFO(this->get_logger(), "Graph built with %ld nodes and %ld edges.",
                 graph_.get_nodes_cloud()->points.size(), graph_.get_adjacency_list().size());
+}
+
+void GraphPlanningNode::callback_dynamic_obstacles(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+{
+    pcl::fromROSMsg(*msg, *dynamic_obstacles_);
 }
 
 void GraphPlanningNode::handle_get_graph_request(
