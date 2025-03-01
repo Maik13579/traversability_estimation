@@ -48,7 +48,7 @@ private:
     tf2_ros::TransformListener tf_listener_;
 
     Graph graph_;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_obstacles_;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr dynamic_obstacle_cloud_;
 
     // Callbacks
     void callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);

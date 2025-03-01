@@ -12,7 +12,8 @@ PlannerType parsePlannerId(const std::string &planner_id)
   // Default to A*
   return PlannerType::A_STAR;
 }
-std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id)
+std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id,
+                              pcl::PointCloud<pcl::PointXYZ>::Ptr dynamic_obstacle_cloud)
 {
   PlannerType type = parsePlannerId(planner_id);
   if (type == PlannerType::D_STAR_LITE) {
