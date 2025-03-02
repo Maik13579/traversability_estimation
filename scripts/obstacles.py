@@ -12,21 +12,12 @@ class Obstacle:
     def __init__(self, name, config, is_dynamic):
         self.name = name
         self.is_dynamic = is_dynamic
-        self.type = config.get('type', 'cube').lower()
 
         # Parse the size string ("1.0, 1.0, 1.0") into a list of floats.
         size_str = config.get('size', "1.0,1.0,1.0")
         self.size = [float(x.strip()) for x in size_str.split(',')]
         # Compute an offset (half the size) so that the marker is centered.
         self.offset = np.array(self.size) / 2.0
-
-        # Create a placeholder for the obstacle mesh.
-        # (In this simplified version we don't generate a cloud.)
-        if self.type == 'cube':
-            # The marker will represent a cube.
-            pass
-        else:
-            pass
 
         if is_dynamic:
             # For dynamic obstacles, store the path (list of waypoints) and speed.

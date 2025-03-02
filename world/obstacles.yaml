@@ -1,12 +1,10 @@
 dynamic_obstacles:
   dummy:
-    type: cube
     size: "1.0, 1.0, 1.0"
     path: [[-16.17, -4.33, 0.60], [-4.583, -8.50, 0.60], [-7.72, -18.48, 0.60], [-16.22, -12.01, 0.61]]
     speed: 1.0  # m/s
     
   big_round:
-    type: cube
     size: "1.0, 1.0, 1.0"
     path: [
       [22.57, -2.99, 0.51],
@@ -30,7 +28,6 @@ dynamic_obstacles:
     speed: 2.0  # m/s
 
   north_south:
-    type: cube
     size: "1.0, 1.0, 2.0"
     path: [
        [-2.43, 13.83, 0.51],
@@ -44,7 +41,6 @@ dynamic_obstacles:
     speed: 3.0
 
   bridge:
-    type: cube
     size: "3.0, 3.0, 3.0"
     path: [
       [-25.52, 25.98, 4.42],
@@ -58,10 +54,8 @@ dynamic_obstacles:
 
 static_obstacles:
   static_cube:
-    type: cube
     size: "1.0, 1.0, 1.0"
     position: "14.49, 14.68, 3.5"
   static_cube2:
-    type: cube
     size: "1.0, 1.0, 1.0"
     position: "-23.51, 22.58, 4.80"

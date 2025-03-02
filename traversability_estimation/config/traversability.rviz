@@ -387,7 +387,7 @@ Visualization Manager:
       Enabled: true
       Name: EndMarker
       Namespaces:
-        end_marker: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -400,7 +400,7 @@ Visualization Manager:
       Enabled: true
       Name: StartMarker
       Namespaces:
-        start_marker: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -505,16 +505,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 63.63053894042969
+      Distance: 89.39632415771484
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 10.291707992553711
-        Y: 2.7398927211761475
-        Z: 2.6645700931549072
+        X: 2.193298578262329
+        Y: -1.58115553855896
+        Z: 1.1399328708648682
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
