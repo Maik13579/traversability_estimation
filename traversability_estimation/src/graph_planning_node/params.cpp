@@ -20,5 +20,8 @@ void load_parameters(GraphPlanningNodeConfig &config, rclcpp::Node *node)
     config.graph.max_neighbors = declare_and_get_parameter<int>("graph.max_neighbors", 100, node, "max_neighbors");
 
     // Load the path parameters
+    config.path.dynamic_inflation_radius = declare_and_get_parameter<double>("path.dynamic_inflation_radius", 1.5, node, "dynamic_inflation_radius");
+    config.path.dynamic_inflation_weight = declare_and_get_parameter<double>("path.dynamic_inflation_weight", 254.0, node, "dynamic_inflation_weight");
+    config.path.cost_scaling_factor = declare_and_get_parameter<double>("path.cost_scaling_factor", 1.0, node, "cost_scaling_factor");
     config.path.smoothing_window_size = declare_and_get_parameter<int>("path.smoothing_window_size", 5, node, "smoothing_window_size");
 }

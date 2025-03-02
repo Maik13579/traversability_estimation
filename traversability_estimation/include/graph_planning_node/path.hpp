@@ -18,7 +18,8 @@
  * @brief Compute a path from a start node to a goal node using A* algorithm.
  */
 std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id,
-                              const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers);
+                              const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers,
+                              const GraphPlanningNodeConfig &config);
 
 /**
  * @brief Estimates the cost of moving from one traversable point to another.

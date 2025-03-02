@@ -48,6 +48,9 @@ struct GraphParams
 
 struct PathParams
 {
+    double dynamic_inflation_radius;
+    double dynamic_inflation_weight;
+    double cost_scaling_factor;
     int smoothing_window_size;
 };
 

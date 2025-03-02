@@ -7,13 +7,13 @@
 //─────────────────────────────
 // Wrapper function: compute_path chooses between plain A* and dynamic A*.
 std::vector<int> compute_path(const Graph &graph, int start, int goal, const std::string &planner_id,
-                              const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers)
-{
-    float max_cost = 254.0f;
+                              const visualization_msgs::msg::MarkerArray &dynamic_obstacles_markers,
+                              const GraphPlanningNodeConfig &config)
+{   float max_cost = config.costs.lethal_cost;
     if (planner_id == "dynamic_a_star") {
-        float inflation_radius = 1.5f;
-        float inflation_weight = 1000.0f;
-        float cost_scaling_factor = 1.0f;
+        float inflation_radius = config.path.dynamic_inflation_radius;
+        float inflation_weight = config.path.dynamic_inflation_weight;
+        float cost_scaling_factor = config.path.cost_scaling_factor;
         // Compute dynamic cost map and pass it to a_star.
         std::vector<float> dynamic_cost_map = compute_dynamic_cost_map(graph, dynamic_obstacles_markers,
                                                  inflation_radius, cost_scaling_factor, inflation_weight);
@@ -131,21 +131,21 @@ std::vector<float> compute_dynamic_cost_map(const Graph &graph,
         query.y = marker.pose.position.y;
         query.z = marker.pose.position.z;
 
-        // use inflation_radius + 1.5* max extend as the effective search radius.
+        // use inflation_radius + 0.7* max extend as the effective search radius.
         std::vector<int> indices;
         std::vector<float> sqr_dists;
-        float inscribed_radius = std::max(marker.scale.x, std::max(marker.scale.y, marker.scale.z));
-        float radius = inflation_radius + 1.5f * inscribed_radius;
+        float circumscribed_radius = std::max(marker.scale.x, std::max(marker.scale.y, marker.scale.z));
+        float radius = inflation_radius + 0.7f * circumscribed_radius;
         if (nodes_tree.radiusSearch(query, radius, indices, sqr_dists) > 0)
         {
             for (size_t i = 0; i < indices.size(); ++i)
             {
                 float d = std::sqrt(sqr_dists[i]);
                 float cost = 0.0f;
-                if (d < inscribed_radius)
+                if (d < circumscribed_radius)
                     cost = inflation_weight;
                 else if (d < radius)
-                    cost = inflation_weight * std::exp(-cost_scaling_factor * (d - inscribed_radius));
+                    cost = inflation_weight * std::exp(-cost_scaling_factor * (d - circumscribed_radius));
                 else
                     cost = 0.0f;
                 if (cost_map[indices[i]] < cost)

@@ -64,6 +64,9 @@ graph_planning:
       max_distance: 0.4 #maximum distance between nodes in the graph
 
     path:
+      dynamic_inflation_radius: 1.5
+      dynamic_inflation_weight: 254.0
+      cost_scaling_factor: 1.0
       smoothing_window_size: 3 #number of points in the smoothing window
 
 
