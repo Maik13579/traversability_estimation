@@ -5,10 +5,11 @@
 #include <omp.h>
 #include <cmath>
 
+
 void perform_traversability_estimation(
     pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud,
-    pcl::PointCloud<TraversablePoint>::Ptr traversable_cloud,
-    pcl::PointCloud<PointXYZICluster>::Ptr obstacle_cloud,
+    pcl::PointCloud<TraversablePoint>::Ptr &traversable_cloud,
+    pcl::PointCloud<PointXYZICluster>::Ptr &obstacle_cloud,
     TraversabilityNodeConfig params)
 {
     // Unpack parameters
@@ -89,6 +90,9 @@ void perform_traversability_estimation(
                                           local_obstacle->points.end());
         }
     }
+    // Perform clustering to remove small clusters -> noise reduction
+    obstacle_cloud = euclidian_clustering<PointXYZICluster>(obstacle_cloud, params);
+    traversable_cloud = euclidian_clustering<TraversablePoint>(traversable_cloud, params);
 }
 
 void compute_boundary(

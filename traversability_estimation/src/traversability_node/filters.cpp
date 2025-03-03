@@ -75,7 +75,10 @@ typename pcl::PointCloud<PointT>::Ptr euclidian_clustering(typename pcl::PointCl
     return clustered_cloud;
 }
 
-template <>
-pcl::PointCloud<PointXYZICluster>::Ptr euclidian_clustering<PointXYZICluster>(
-    pcl::PointCloud<PointXYZICluster>::Ptr input_cloud,
-    TraversabilityNodeConfig params);
+// Explicit instantiation for PointXYZICluster
+template pcl::PointCloud<PointXYZICluster>::Ptr euclidian_clustering<PointXYZICluster>(
+    pcl::PointCloud<PointXYZICluster>::Ptr input_cloud, TraversabilityNodeConfig params);
+
+// Explicit instantiation for TraversablePoint
+template pcl::PointCloud<TraversablePoint>::Ptr euclidian_clustering<TraversablePoint>(
+    pcl::PointCloud<TraversablePoint>::Ptr input_cloud, TraversabilityNodeConfig params);
