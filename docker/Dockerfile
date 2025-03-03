@@ -1,4 +1,5 @@
-FROM ros:humble
+ARG BASE_IMAGE=ros:humble
+FROM ${BASE_IMAGE}
 
 #environment variables
 ENV ROS_WS /root/ros2_ws
