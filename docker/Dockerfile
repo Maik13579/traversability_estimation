@@ -2,8 +2,8 @@ ARG BASE_IMAGE=ros:humble
 FROM ${BASE_IMAGE}
 
 #environment variables
-ENV ROS_WS /root/ros2_ws
-ENV DEBIAN_FRONTEND noninteractive
+ENV ROS_WS=/root/ros2_ws
+ENV DEBIAN_FRONTEND=noninteractive
 
 #ros2 DDS implementation
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
