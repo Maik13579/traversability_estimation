@@ -80,5 +80,5 @@ template pcl::PointCloud<PointXYZICluster>::Ptr euclidian_clustering<PointXYZICl
     pcl::PointCloud<PointXYZICluster>::Ptr input_cloud, TraversabilityNodeConfig params);
 
 // Explicit instantiation for TraversablePoint
-template pcl::PointCloud<TraversablePoint>::Ptr euclidian_clustering<TraversablePoint>(
-    pcl::PointCloud<TraversablePoint>::Ptr input_cloud, TraversabilityNodeConfig params);
+// template pcl::PointCloud<TraversablePoint>::Ptr euclidian_clustering<TraversablePoint>(
+//     pcl::PointCloud<TraversablePoint>::Ptr input_cloud, TraversabilityNodeConfig params);

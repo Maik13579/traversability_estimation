@@ -92,7 +92,7 @@ void perform_traversability_estimation(
     }
     // Perform clustering to remove small clusters -> noise reduction
     obstacle_cloud = euclidian_clustering<PointXYZICluster>(obstacle_cloud, params);
-    traversable_cloud = euclidian_clustering<TraversablePoint>(traversable_cloud, params);
+    // traversable_cloud = euclidian_clustering<TraversablePoint>(traversable_cloud, params);
 }
 
 void compute_boundary(
