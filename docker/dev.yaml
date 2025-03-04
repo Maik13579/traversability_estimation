@@ -5,7 +5,6 @@ services:
       file: common.yaml
       service: .common_nvidia
     volumes:
-      - ../world:/world
       - ../traversability_estimation/config:/root/ros2_ws/src/traversability_estimation/traversability_estimation/config
       - ../traversability_estimation/launch:/root/ros2_ws/src/traversability_estimation/traversability_estimation/launch
     command: ros2 launch traversability_estimation traversability_estimation.launch.py use_rviz:=true
@@ -22,5 +21,6 @@ services:
       - bash
       - -c
       - |  
-          python3 /scripts/obstacles.py /world/obstacles.yaml&
+          echo python3 /scripts/obstacles.py /world/obstacles.yaml&
+          python3 /scripts/actors.py 5&
           python3 /scripts/main.py /world/world.stl
